@@ -34,3 +34,10 @@ abstract class MascotaBase(
 
      // ✅ Aquí solo la declaras
 }
+fun reconstruirMascotaBase(mascota: Mascota): MascotaBase {
+    return when (mascota.tipoBiotamon) {
+        1 -> MascotaPlanta(mascota)
+        2 -> MascotaAnimal(mascota)
+        else -> MascotaPlanta(mascota) // fallback
+    }
+}

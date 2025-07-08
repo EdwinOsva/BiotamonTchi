@@ -140,33 +140,3 @@ enum class Etapa {
 }
 
 
-
-/*
-object UmbralesVida {
-    const val SEMILLA =  15 * 1000L   // 1 minutos
-    const val PLANTULA =   10 * 60 * 1000L    // 2 minutos
-    const val PLANTA =   15 * 60 * 1000L      // 3 minutos
-    const val MADURA =   25 * 60 * 1000L     // 4 minutos
-    const val MARCHITA =  40 * 60 * 1000L     // 5 minutos
-    const val MUERTA =   45 * 60 * 1000L    // 6 minutos
-}
-
-
-fun determinarEtapa(tiempoDesdeInicio: Long): Etapa {
-
-
-    return when {
-
-
-        tiempoDesdeInicio < UmbralesVida.SEMILLA -> Etapa.SEMBRAR
-        tiempoDesdeInicio < UmbralesVida.PLANTULA -> Etapa.SEMILLA
-        tiempoDesdeInicio < UmbralesVida.PLANTA -> Etapa.PLANTULA
-        tiempoDesdeInicio < UmbralesVida.MADURA -> Etapa.PLANTA
-        tiempoDesdeInicio < UmbralesVida.MARCHITA -> Etapa.MADURA
-        tiempoDesdeInicio < UmbralesVida.MUERTA -> Etapa.MARCHITA
-        else -> Etapa.MUERTA
-    }
-}
-
-*/
-

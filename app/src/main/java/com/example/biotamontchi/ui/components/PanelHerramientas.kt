@@ -1,5 +1,6 @@
 package com.example.biotamontchi.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,6 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.biotamontchi.data.Mascota
+import com.example.biotamontchi.data.MascotaBase
 import com.example.biotamontchi.data.PrefsManager
 import kotlinx.coroutines.delay
 
@@ -34,9 +36,11 @@ import kotlinx.coroutines.delay
 fun PanelHerramientas(
     mascota: Mascota,
 
+
     monedas: MutableState<Int>,
 
     onActualizarMonedas: (Int) -> Unit,
+    onPodaClick: () -> Unit,
     onRegar: () -> Unit,
     onCerrar: () -> Unit,
     onAbrirAlimentos: () -> Unit
@@ -222,10 +226,10 @@ fun PanelHerramientas(
                             modifier = Modifier
                                 .size(60.dp)
                                 .clickable {
-                                    // Acción para regresar
-                               //     Podar()
+                                    onPodaClick()
                                 }
                         )
+
                         Text(
                             text = "$1",
                             fontWeight = FontWeight.Bold,

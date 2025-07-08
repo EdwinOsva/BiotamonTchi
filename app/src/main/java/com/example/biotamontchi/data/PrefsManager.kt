@@ -12,13 +12,22 @@ class PrefsManager(context: Context) {
             .putFloat("semilla_y", posicion.y)
             .apply()
     }
+    fun obtenerPosicionSemilla(): Offset? {
+        val x = prefs.getFloat("semilla_x", -1f)
+        val y = prefs.getFloat("semilla_y", -1f)
+        return if (x >= 0 && y >= 0) Offset(x, y) else null
+    }
 
 
     fun guardarNombreUsuario(nombre: String) {
-        prefs.edit().putString("nombreUsuario", nombre).apply()
+        val editor = prefs.edit()
+        editor.putString("nombre_usuario", nombre)
+        editor.apply()
     }
 
-    fun obtenerNombreUsuario(): String? = prefs.getString("nombreUsuario", null)
+    fun obtenerNombreUsuario(): String? {
+        return prefs.getString("nombre_usuario", null)
+    }
 
     fun guardarTipoPlanta(tipo: String) {
         prefs.edit().putString("tipoPlanta", tipo).apply()
@@ -91,14 +100,27 @@ class PrefsManager(context: Context) {
         guardarIndicador("simbiosis", mascota.simbiosis)
         guardarIndicador("adaptacion", mascota.adaptacion)
         guardarIndicador("riegos", mascota.riegos)
-        guardarLong("fechaInicioJuego", mascota.fechaInicioJuego)
-        guardarLong("fechaUltimoRiego", mascota.fechaUltimoRiego)
-        guardarLong("tiempoVida", mascota.tiempoVida)
         guardarIndicador("ciclosCompletados", mascota.ciclosCompletados)
         guardarIndicador("indiceAnimacion", mascota.indiceAnimacion)
 
-        guardarTexto("etapa", mascota.etapa.name) // ✅ guardamos la etapa
+        guardarLong("fechaInicioJuego", mascota.fechaInicioJuego)
+        guardarLong("fechaUltimoRiego", mascota.fechaUltimoRiego)
+        guardarLong("tiempoVida", mascota.tiempoVida)
+        guardarLong("fechaUltimaFelicidad", mascota.fechaUltimaFelicidad)
+        guardarLong("fechaUltimosNutrientes", mascota.fechaUltimosNutrientes)
+        guardarLong("fechaUltimasPlagas", mascota.fechaUltimasPlagas)
+
+        guardarTexto("etapa", mascota.etapa.name)
+        guardarTexto("etapaMaxima", mascota.etapaMaxima.name)
+        guardarIndicador("tipoBiotamon", mascota.tipoBiotamon)
+        guardarTexto("especie", mascota.especie)
+
+        mascota.posicion?.let {
+            guardarFloat("posicionX", it.x)
+            guardarFloat("posicionY", it.y)
+        }
     }
+
 
 
     fun cargarMascota(): Mascota {
@@ -139,135 +161,3 @@ class PrefsManager(context: Context) {
         )
     }
 }
-    /*
-    fun guardarMascota(mascota: MascotaBase) {
-        // Asegúrate de hacer un "cast seguro" si necesitas acceder a propiedades específicas
-        val planta = mascota as? MascotaPlanta ?: return
-
-        guardarIndicador("agua", planta.agua)
-        guardarIndicador("feliz", planta.feliz)
-        guardarIndicador("nutrientes", planta.nutrientes)
-        guardarIndicador("plagas", planta.plagas)
-        guardarIndicador("resistencia", planta.resistencia)
-        guardarIndicador("germinacion", planta.germinacion)
-        guardarIndicador("acuatica", planta.acuatica)
-        guardarIndicador("aerea", planta.aerea)
-        guardarIndicador("parasita", planta.parasita)
-        guardarIndicador("propagacion", planta.propagacion)
-        guardarIndicador("simbiosis", planta.simbiosis)
-        guardarIndicador("adaptacion", planta.adaptacion)
-        guardarIndicador("riegos", planta.riegos)
-        guardarLong("fechaInicioJuego", planta.fechaInicioJuego)
-        guardarLong("fechaUltimoRiego", planta.fechaUltimoRiego)
-        guardarLong("tiempoVida", planta.tiempoVida)
-        guardarIndicador("ciclosCompletados", planta.ciclosCompletados)
-        guardarIndicador("indiceAnimacion", planta.indiceAnimacion)
-
-        guardarTexto("etapa", planta.etapa.name)
-        guardarTexto("especie_biotamon", planta.especie)
-        guardarIndicador("tipoBiotamon", planta.tipoBiotamon)
-    }
-
-    fun cargarMascota(): MascotaBase {  // ✅ cambia el tipo de retorno a MascotaBase
-        val etapaGuardada = obtenerTexto("etapa")
-        val etapa = try {
-            Etapa.valueOf(etapaGuardada ?: "SEMBRAR")
-        } catch (e: Exception) {
-            Etapa.SEMBRAR
-        }
-        val x = obtenerFloat("semilla_x")
-        val y = obtenerFloat("semilla_y")
-        val posicion = if (x != null && y != null) Offset(x, y) else null
-
-        return MascotaPlanta( // ✅ crea instancia de MascotaPlanta directamente
-            agua = obtenerIndicador("agua"),
-            feliz = obtenerIndicador("feliz"),
-            fechaUltimaFelicidad = obtenerLong("fechaUltimaFelicidad"),
-            nutrientes = obtenerIndicador("nutrientes"),
-            fechaUltimosNutrientes = obtenerLong("fechaUltimosNutrientes"),
-            plagas = obtenerIndicador("plagas"),
-            fechaUltimasPlagas = obtenerLong("fechaUltimasPlagas"),
-            resistencia = obtenerIndicador("resistencia"),
-            germinacion = obtenerIndicador("germinacion"),
-            acuatica = obtenerIndicador("acuatica"),
-            aerea = obtenerIndicador("aerea"),
-            parasita = obtenerIndicador("parasita"),
-            propagacion = obtenerIndicador("propagacion"),
-            simbiosis = obtenerIndicador("simbiosis"),
-            adaptacion = obtenerIndicador("adaptacion"),
-            fechaInicioJuego = obtenerLong("fechaInicioJuego"),
-            fechaUltimoRiego = obtenerLong("fechaUltimoRiego"),
-            tiempoVida = obtenerLong("tiempoVida"),
-            ciclosCompletados = obtenerIndicador("ciclosCompletados"),
-            indiceAnimacion = obtenerIndicador("indiceAnimacion"),
-            etapa = etapa,
-            riegos = obtenerIndicador("riegos"),
-            posicion = posicion,
-            tipoBiotamon = obtenerIndicador("tipoBiotamon"),
-            especie = cargarEspecie()
-        )
-    }
-
-    fun guardarMascota(mascota: Mascota) {
-        guardarIndicador("agua", mascota.agua)
-        guardarIndicador("feliz", mascota.feliz)
-        guardarIndicador("nutrientes", mascota.nutrientes)
-        guardarIndicador("plagas", mascota.plagas)
-        guardarIndicador("resistencia", mascota.resistencia)
-        guardarIndicador("germinacion", mascota.germinacion)
-        guardarIndicador("acuatica", mascota.acuatica)
-        guardarIndicador("aerea", mascota.aerea)
-        guardarIndicador("parasita", mascota.parasita)
-        guardarIndicador("propagacion", mascota.propagacion)
-        guardarIndicador("simbiosis", mascota.simbiosis)
-        guardarIndicador("adaptacion", mascota.adaptacion)
-        guardarIndicador("riegos", mascota.riegos)
-        guardarLong("fechaInicioJuego", mascota.fechaInicioJuego)
-        guardarLong("fechaUltimoRiego", mascota.fechaUltimoRiego)
-        guardarLong("tiempoVida", mascota.tiempoVida)
-        guardarIndicador("ciclosCompletados", mascota.ciclosCompletados)
-        guardarIndicador("indiceAnimacion", mascota.indiceAnimacion)
-
-        guardarTexto("etapa", mascota.etapa.name) // ✅ guardamos la etapa
-    }
-
-
-    fun cargarMascota(): Mascota {
-        val etapaGuardada = obtenerTexto("etapa")
-        val etapa = try {
-            Etapa.valueOf(etapaGuardada ?: "SEMBRAR")
-        } catch (e: Exception) {
-            Etapa.SEMBRAR
-        }
-        val x = obtenerFloat("semilla_x")
-        val y = obtenerFloat("semilla_y")
-        val posicion = if (x != null && y != null) Offset(x, y) else null
-
-        return Mascota(
-            agua = obtenerIndicador("agua"),
-            feliz = obtenerIndicador("feliz"),
-            nutrientes = obtenerIndicador("nutrientes"),
-            plagas = obtenerIndicador("plagas"),
-            resistencia = obtenerIndicador("resistencia"),
-            germinacion = obtenerIndicador("germinacion"),
-            acuatica = obtenerIndicador("acuatica"),
-            aerea = obtenerIndicador("aerea"),
-            parasita = obtenerIndicador("parasita"),
-            propagacion = obtenerIndicador("propagacion"),
-            simbiosis = obtenerIndicador("simbiosis"),
-            adaptacion = obtenerIndicador("adaptacion"),
-            fechaInicioJuego = obtenerLong("fechaInicioJuego"),
-            fechaUltimoRiego = obtenerLong("fechaUltimoRiego"),
-            tiempoVida = obtenerLong("tiempoVida"),
-            ciclosCompletados = obtenerIndicador("ciclosCompletados"),
-            indiceAnimacion = obtenerIndicador("indiceAnimacion"),
-            etapa = etapa, // ✅ aquí cargas correctamente la etapa guardada
-            riegos = obtenerIndicador("riegos"),
-            posicion = posicion,
-            tipoBiotamon = obtenerIndicador("tipoBiotamon"),
-            especie = cargarEspecie()
-
-        )
-    }
-*/
-

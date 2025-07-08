@@ -81,110 +81,7 @@ fun DibujarAnimacionRiego(
     }
 }
 
-@Composable
-fun DibujarAnimacionPlagas(
-    semillaPosicion: Offset,
-    nivelPlagas: Int, // 🔁 nuevo parámetro
-    onAnimacionCompleta: () -> Unit
-)
-{
-    val imagenBoxSize = 100.dp
-    val density = LocalDensity.current
-    val imagenBoxSizePx = with(density) { imagenBoxSize.toPx() }
-    val ajusteVertical = 40
 
-    var cuadroActual by remember { mutableStateOf(1) }
-
-    // Avanzar cada 150ms en loop
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(150)
-            cuadroActual = (cuadroActual % 4) + 1 // Ciclo de 1 a 4
-        }
-    }
-
-    val imagenId = when (cuadroActual) {
-        1 -> if (nivelPlagas > 6) R.drawable.insectos1 else R.drawable.insectos01
-        2 -> if (nivelPlagas > 6) R.drawable.insectos2 else R.drawable.insectos02
-        3 -> if (nivelPlagas > 6) R.drawable.insectos3 else R.drawable.insectos03
-        4 -> if (nivelPlagas > 6) R.drawable.insectos4 else R.drawable.insectos04
-        else -> R.drawable.insectos01
-    }
-
-
-    Box(
-        modifier = Modifier
-            .size(imagenBoxSize)
-            .offset {
-                IntOffset(
-                    x = (semillaPosicion.x - imagenBoxSizePx / 2).toInt(),
-                    y = (semillaPosicion.y - imagenBoxSizePx / 2 - ajusteVertical).toInt()
-                )
-            },
-        contentAlignment = Alignment.Center
-    ) {
-        Image(
-            painter = painterResource(id = imagenId),
-            contentDescription = "Animación Plagas",
-            contentScale = ContentScale.Fit,
-            modifier = Modifier.fillMaxSize()
-        )
-    }
-}
-
-
-@Composable
-fun DibujarAnimacionBrotes(
-    semillaPosicion: Offset,
-    nivelNutrientes: Int, // 🔁 nuevo parámetro
-    onAnimacionCompleta: () -> Unit
-)
-{
-    val imagenBoxSize = 100.dp
-    val density = LocalDensity.current
-    val imagenBoxSizePx = with(density) { imagenBoxSize.toPx() }
-    val ajusteVertical = 40
-
-    var cuadroActual by remember { mutableStateOf(1) }
-    // ⚡ Cambiar velocidad según nutrientes
-    val velocidad = if (nivelNutrientes > 6) 150L else 220L
-
-    // Avanzar cada 150ms en loop
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(velocidad)
-            cuadroActual = (cuadroActual % 4) + 1 // Ciclo de 1 a 4
-        }
-    }
-
-    val imagenId = when (cuadroActual) {
-        1 ->   R.drawable.brotes1
-        2 ->   R.drawable.brotes2
-        3 ->  R.drawable.brotes3
-        4 ->   R.drawable.brotes4
-        else -> R.drawable.brotes1
-    }
-
-
-    Box(
-        modifier = Modifier
-            .size(imagenBoxSize)
-            .offset {
-                IntOffset(
-                    x = (semillaPosicion.x - imagenBoxSizePx / 2).toInt(),
-                    y = (semillaPosicion.y - imagenBoxSizePx / 2 - ajusteVertical).toInt()
-                )
-            },
-        contentAlignment = Alignment.Center
-    ) {
-        Image(
-            painter = painterResource(id = imagenId),
-            contentDescription = "Animación Plagas",
-            contentScale = ContentScale.Fit,
-            modifier = Modifier.fillMaxSize()
-        )
-    }
-}
 
 @Composable
 fun DibujarPersonajeAnimacionLoop(
@@ -291,7 +188,7 @@ fun DibujarAnimacionSembrar(
 }
 
 @Composable
-fun DibujarAnimacionPlagas2(
+fun DibujarAnimacionPlagas(
     mascota: MascotaBase,
     semillaPosicion: Offset,
     nivelPlagas: Int,
@@ -337,3 +234,51 @@ fun DibujarAnimacionPlagas2(
     }
 }
 
+
+@Composable
+fun DibujarAnimacionBrotes(
+    mascota: MascotaBase,
+    semillaPosicion: Offset,
+    nivelNutrientes: Int,
+    onAnimacionCompleta: () -> Unit
+)
+{
+    val imagenBoxSize = 100.dp
+    val density = LocalDensity.current
+    val imagenBoxSizePx = with(density) { imagenBoxSize.toPx() }
+    val ajusteVertical = 40
+
+    var cuadroActual by remember { mutableStateOf(1) }
+
+    // Animación cuadro a cuadro
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(150)
+            cuadroActual = (cuadroActual % 4) + 1
+        }
+    }
+
+    val imagenes = (mascota as? MascotaPlanta)?.animacionesDeBrotes( )
+        ?: mascota.animacionesDeBrotes() // por si no es planta
+
+    val imagenId = imagenes.getOrElse(cuadroActual - 1) { imagenes.first() }
+
+    Box(
+        modifier = Modifier
+            .size(imagenBoxSize)
+            .offset {
+                IntOffset(
+                    x = (semillaPosicion.x - imagenBoxSizePx / 2).toInt(),
+                    y = (semillaPosicion.y - imagenBoxSizePx / 2 - ajusteVertical).toInt()
+                )
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            painter = painterResource(id = imagenId),
+            contentDescription = "Animación Brotes",
+            contentScale = ContentScale.Fit,
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+}
