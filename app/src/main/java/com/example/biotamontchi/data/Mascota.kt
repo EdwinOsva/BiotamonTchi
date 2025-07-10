@@ -51,11 +51,11 @@ class MascotaPlanta(
         10 * 60 * 1000L
     )
 
-    override fun determinarEtapa(): Etapa {
+    override fun determinarEtapa(etapaActual: Etapa): Etapa {
         val tiempo = System.currentTimeMillis() - datos.fechaInicioJuego
 
         return when {
-            tiempo < umbrales[0] -> Etapa.SEMBRAR
+            tiempo < umbrales[0] -> if (etapaActual <= Etapa.SEMBRAR) Etapa.SEMBRAR else Etapa.SEMILLA
             tiempo < umbrales[1] -> Etapa.SEMILLA
             tiempo < umbrales[2] -> Etapa.PLANTULA
             tiempo < umbrales[3] -> Etapa.PLANTA

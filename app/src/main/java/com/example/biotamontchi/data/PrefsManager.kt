@@ -18,6 +18,13 @@ class PrefsManager(context: Context) {
         return if (x >= 0 && y >= 0) Offset(x, y) else null
     }
 
+    fun guardarJuegoIniciado(valor: Boolean) {
+        prefs.edit().putBoolean("juegoIniciado", valor).apply()
+    }
+
+    fun juegoIniciado(): Boolean {
+        return prefs.getBoolean("juegoIniciado", false)
+    }
 
     fun guardarNombreUsuario(nombre: String) {
         val editor = prefs.edit()

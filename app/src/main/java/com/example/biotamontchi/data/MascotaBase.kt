@@ -1,7 +1,6 @@
 package com.example.biotamontchi.data
 
 
-import androidx.compose.ui.geometry.Offset
 abstract class MascotaBase(
     open val datos: Mascota
 ) {
@@ -14,11 +13,11 @@ abstract class MascotaBase(
         40 * 60 * 1000L,
         45 * 60 * 1000L,
     )
-    open fun determinarEtapa(): Etapa {
+    open fun determinarEtapa(etapaActual: Etapa = Etapa.SEMBRAR): Etapa {
         val tiempo = System.currentTimeMillis() - datos.fechaInicioJuego
 
         return when {
-            tiempo < umbrales[0] -> Etapa.SEMBRAR
+            tiempo < umbrales[0] -> if (etapaActual <= Etapa.SEMBRAR) Etapa.SEMBRAR else Etapa.SEMILLA
             tiempo < umbrales[1] -> Etapa.SEMILLA
             tiempo < umbrales[2] -> Etapa.PLANTULA
             tiempo < umbrales[3] -> Etapa.PLANTA

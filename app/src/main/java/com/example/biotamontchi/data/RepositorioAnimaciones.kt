@@ -391,9 +391,35 @@ object RepositorioAnimaciones {
                         R.drawable.muerta1,
                         R.drawable.muerta1,
                     )
+                ),
+                    "seco" to mapOf(
+                        "margarita" to listOf(
+                            R.drawable.muerta1,
+                            R.drawable.muerta1,
+                            R.drawable.muerta1,
+                            R.drawable.muerta1,
+                            R.drawable.muerta1,
+                            R.drawable.muerta1,
+                        ),
+                        "amapola" to listOf(
+                            R.drawable.muerta1,
+                            R.drawable.muerta1,
+                            R.drawable.muerta1,
+                            R.drawable.muerta1,
+                            R.drawable.muerta1,
+                            R.drawable.muerta1,
+                        ),
+                        "lili" to listOf(
+                            R.drawable.muerta1,
+                            R.drawable.muerta1,
+                            R.drawable.muerta1,
+                            R.drawable.muerta1,
+                            R.drawable.muerta1,
+                            R.drawable.muerta1,
+                        )
+                    )
                 )
             )
         )
-    )
 }
 

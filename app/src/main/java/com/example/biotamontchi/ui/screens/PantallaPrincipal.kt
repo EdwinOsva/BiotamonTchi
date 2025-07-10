@@ -56,7 +56,6 @@ import com.example.biotamontchi.viewmodel.GameAudioViewModel
 import com.example.biotamontchi.data.MascotaAnimal
 import com.example.biotamontchi.data.MascotaPlanta
 import com.example.biotamontchi.data.PrefsManager
-import com.example.biotamontchi.data.reconstruirMascotaBase
 import com.example.biotamontchi.model.GameAudioViewModelFactory
 import com.example.biotamontchi.ui.components.DibujarAnimacionPlagas
 import com.example.biotamontchi.ui.components.RelojConControles
@@ -82,8 +81,6 @@ fun PantallaPrincipal(viewModelHora: VistaHoraReloj, onRegresarClick: () -> Unit
     var tipoPlanta = remember { mutableStateOf(prefs.obtenerTipoPlanta()) }
     //cargar mascota
 
-
-
     val mascotaGuardada = prefs.cargarMascota()
 
     var mascotaEstado by remember { mutableStateOf(mascotaGuardada) }
@@ -92,8 +89,6 @@ fun PantallaPrincipal(viewModelHora: VistaHoraReloj, onRegresarClick: () -> Unit
     var plantaSeleccionada by remember {
         mutableStateOf(mascotaGuardada.especie.replaceFirstChar { it.uppercase() })
     }
-
-
 
     val mostrarDialogo = remember { mutableStateOf(nombreUsuario.value == null || tipoPlanta.value == null) }
     // Monedas
@@ -124,16 +119,18 @@ fun PantallaPrincipal(viewModelHora: VistaHoraReloj, onRegresarClick: () -> Unit
             y = screenHeight.toPx() / 2
         )
     }
+
+    val posicionGuardada = remember {
+        val x = prefs.obtenerFloat("semilla_x")
+        val y = prefs.obtenerFloat("semilla_y")
+        if (x != null && y != null) Offset(x, y) else centroOffset
+    }
+
 // Estado de la posición de la semilla
-    var posicionPersonaje by remember { mutableStateOf(Offset(500f, 800f)) }
+    var posicionPersonaje by remember { mutableStateOf(posicionGuardada) }
+    var semillaPosicion by remember { mutableStateOf(posicionGuardada) }
 
-    var semillaPosicion by remember { mutableStateOf<Offset?>(centroOffset) }
-
-    val x = prefs.obtenerFloat("semilla_x")
-    val y = prefs.obtenerFloat("semilla_y")
-    posicionPersonaje = if (x != null && y != null) Offset(x, y) else centroOffset
-    semillaPosicion = if (x != null && y != null) Offset(x, y) else null
-
+    val juegoIniciado = remember { prefs.juegoIniciado() }
 
 //mostrar horas del reloj
     val hora12 = if (horaActual.hour % 12 == 0) 12 else horaActual.hour % 12
@@ -166,21 +163,26 @@ fun PantallaPrincipal(viewModelHora: VistaHoraReloj, onRegresarClick: () -> Unit
 //saludo inicio
     var mostrarMensajeInicio by remember { mutableStateOf(false) }
 // determinar etapa para mostrar dibujos en animacion
-    var mascotaBase = when (mascotaEstado.tipoBiotamon) {
+    val mascotaBase = when (mascotaEstado.tipoBiotamon) {
         1 -> MascotaPlanta(mascotaEstado)
         2 -> MascotaAnimal(mascotaEstado)
-        else -> MascotaPlanta(mascotaEstado) // Por defecto
+        else -> MascotaPlanta(mascotaEstado)
     }
-    var etapaInicial = remember {
-        if (mascotaBase.datos.riegos == 0) {
-            Etapa.SEMBRAR
-        } else {
-            mascotaBase.determinarEtapa()
-        }
+
+    val etapaInicial by remember(mascotaEstado) {
+        mutableStateOf(
+            if (mascotaBase.datos.riegos == 0) {
+                Etapa.SEMBRAR
+            } else {
+                mascotaBase.determinarEtapa()
+            }
+        )
     }
 
 
     var etapaActual by remember { mutableStateOf(etapaInicial) }
+
+    var nuevaEtapa by remember { mutableStateOf(etapaInicial) }
 
     var mostrarCambioEtapa by remember { mutableStateOf(false) }
 
@@ -290,8 +292,8 @@ fun PantallaPrincipal(viewModelHora: VistaHoraReloj, onRegresarClick: () -> Unit
 
     var mostrarAnimacionBrotes by remember { mutableStateOf(false) }
     val delayIndicadorNutrientes = 30_000L
-    val delayBrotesRapido = delayIndicadorNutrientes / 2
 
+    var muerteProcesada by remember { mutableStateOf(false) }
 
 
     //estadisticas
@@ -367,7 +369,10 @@ fun PantallaPrincipal(viewModelHora: VistaHoraReloj, onRegresarClick: () -> Unit
         mascotaEstado.fechaUltimaFelicidad = 0L
         mascotaEstado.fechaUltimosNutrientes = 0L
         mascotaEstado.fechaUltimasPlagas = 0L
+        prefs.guardarJuegoIniciado(false)
+        etapaActual = Etapa.SEMBRAR
 
+        nuevaEtapa = Etapa.SEMBRAR
         // Posición inicial al centro
         val centroOffset = with(density) {
             Offset(screenWidth.toPx() / 2, screenHeight.toPx() / 2)
@@ -384,6 +389,15 @@ fun PantallaPrincipal(viewModelHora: VistaHoraReloj, onRegresarClick: () -> Unit
         enTutorial = true
         pasoTutorial = 0
         tiempoTranscurrido = 0L
+//si murio por seco u otra
+        muerteProcesada = true
+        mostrarDialogoCambioBiotamon = false
+        mostrarDialogoReinicio = false
+        mostrarResumenMuerte = false
+
+
+        mascotaEstado = nuevaMascota
+
     }
 
 
@@ -403,24 +417,29 @@ fun PantallaPrincipal(viewModelHora: VistaHoraReloj, onRegresarClick: () -> Unit
                     especie = nuevaPlanta.lowercase(), // ✅ ACTUALIZA ESPECIE AQUÍ
                     ciclosCompletados = mascotaEstado.ciclosCompletados + 1,
                     fechaInicioJuego = System.currentTimeMillis(),
-                    fechaUltimoRiego = 0L,
+
                     etapa = Etapa.SEMBRAR
                 )
+                etapaActual = Etapa.SEMBRAR
 
+                nuevaEtapa = Etapa.SEMBRAR
                 // ✅ GUARDAMOS CORRECTAMENTE LOS DATOS
                 prefs.guardarMascota(mascotaEstado)
                 prefs.guardarEspecie(nuevaPlanta.lowercase())
                 prefs.guardarTipoPlanta(nuevaPlanta.lowercase())
                 prefs.guardarTipoBiotamon(tipoBiotamon)
 
+                muerteProcesada = true
                 mostrarDialogoCambioBiotamon = false
+                mostrarDialogoReinicio = false
+                mostrarResumenMuerte = false
             },
             onCancelar = {
                 mostrarDialogoCambioBiotamon = false
+                muerteProcesada = false
             }
         )
     }
-
 
     if (mostrarResumenMuerte) {
         val tiempoVidaMs = mascotaEstado.tiempoVida.takeIf { it > 0 }
@@ -431,12 +450,49 @@ fun PantallaPrincipal(viewModelHora: VistaHoraReloj, onRegresarClick: () -> Unit
         val minutos = minutosVida % 60
 
         AlertDialog(
-            onDismissRequest = { mostrarResumenMuerte = false },
+            onDismissRequest = {
+                mostrarResumenMuerte = false
+                reintentarReinicio = true
+            },
             confirmButton = {
                 TextButton(onClick = {
+                    // ✅ Reiniciar con misma especie
                     mostrarResumenMuerte = false
+                    mostrarDialogoCambioBiotamon = false
+                    reintentarReinicio = false
+                    muerteProcesada = true
+
+                    mascotaEstado = mascotaEstado.copy(
+                        ciclosCompletados = mascotaEstado.ciclosCompletados + 1,
+                        fechaInicioJuego = System.currentTimeMillis(),
+                        etapa = Etapa.SEMBRAR
+                    )
+                    etapaActual = Etapa.SEMBRAR
+                    nuevaEtapa = Etapa.SEMBRAR
+                    prefs.guardarMascota(mascotaEstado)
                 }) {
-                    Text("Aceptar")
+                    Text("Resembrar especie")
+                }
+            },
+            dismissButton = {
+                Row {
+                    TextButton(onClick = {
+                        // 🔄 Cambiar especie
+                        mostrarResumenMuerte = false
+                        muerteProcesada = true
+                        mostrarDialogoCambioBiotamon = true
+                    }) {
+                        Text("Cambiar especie")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    TextButton(onClick = {
+                        // ❌ Cancelar (volver a mostrar después con delay)
+                        mostrarResumenMuerte = false
+                        muerteProcesada = false
+                        reintentarReinicio = true
+                    }) {
+                        Text("Cancelar")
+                    }
                 }
             },
             title = { Text("☠️ Tu planta ha muerto de vieja") },
@@ -452,6 +508,7 @@ fun PantallaPrincipal(viewModelHora: VistaHoraReloj, onRegresarClick: () -> Unit
             }
         )
     }
+
 
     if (!enTutorial) {
         if (mostrarCambioEtapa) {
@@ -474,28 +531,7 @@ fun PantallaPrincipal(viewModelHora: VistaHoraReloj, onRegresarClick: () -> Unit
         }
     }
 
-    if (mostrarDialogoReinicio) {
-        MostrarDialogoReinicioPlanta(
-            onConfirmar = {
-                mostrarDialogoReinicio = false
-                mascotaEstado = mascotaEstado.copy(
-                    ciclosCompletados = mascotaEstado.ciclosCompletados + 1,
-                    fechaInicioJuego = System.currentTimeMillis(),
-                    fechaUltimoRiego = 0L,
-                    etapa = Etapa.SEMBRAR
-                )
-                prefs.guardarMascota(mascotaEstado)
-            },
-            onCancelar = {
-                mostrarDialogoReinicio = false
-                reintentarReinicio = true // Activa el LaunchedEffect
-            },
-            onCambiarEspecie = {
-                mostrarDialogoReinicio = false
-                mostrarDialogoCambioBiotamon = true
-            }
-        )
-    }
+
 
 
     if (mostrarMensajeInicio) {
@@ -564,6 +600,7 @@ fun PantallaPrincipal(viewModelHora: VistaHoraReloj, onRegresarClick: () -> Unit
 
                     Spacer(Modifier.height(16.dp))
                     Button(onClick = {
+                        prefs?.limpiarDatos()
                         iniciarNuevaPartida(prefs, nombre, tipoGeneralSeleccionado, plantaSeleccionada)
 
                         mostrarDialogo.value = false
@@ -571,7 +608,7 @@ fun PantallaPrincipal(viewModelHora: VistaHoraReloj, onRegresarClick: () -> Unit
                         pasoTutorial = 1
 
                         actualizarMonedas(0)
-
+                        muerteProcesada = true
                         val nuevaMascota = prefs.cargarMascota()
                         mascotaEstado = nuevaMascota
 
@@ -739,54 +776,49 @@ fun PantallaPrincipal(viewModelHora: VistaHoraReloj, onRegresarClick: () -> Unit
 
         // ✅ Esto se ejecuta una sola vez al inicio
         LaunchedEffect(Unit) {
-            if (etapaInicial == Etapa.MUERTA) {
-                delay(5000L) // pequeño delay para que Compose termine de montar
+            if (mascotaEstado.etapa == Etapa.MUERTA && !muerteProcesada) {
+                delay(2000L) // pequeño delay para que Compose termine de montar
                 mostrarResumenMuerte = true
-                mostrarDialogoReinicio = true
             }
         }
         LaunchedEffect(reintentarReinicio) {
             if (reintentarReinicio) {
-                delay(10000L)
-                if (mascotaEstado.etapa == Etapa.MUERTA) {
-                    mostrarDialogoReinicio = true
+                delay(60000L)
+                if (mascotaEstado.etapa == Etapa.MUERTA && !muerteProcesada) {
+                    mostrarResumenMuerte = true
                 }
                 reintentarReinicio = false
             }
         }
 
-        LaunchedEffect(mascotaEstado.etapa) {
-            if (mascotaEstado.etapa == Etapa.MUERTA) {
-                delay(3000L)
-                if (mascotaEstado.etapa == Etapa.MUERTA) {
-                    mostrarDialogoReinicio = true
-                }
-            }
-        }
+
 
         LaunchedEffect(mascotaEstado.etapa) {
-            if (mascotaEstado.etapa == Etapa.MUERTA) {
-                delay(8000L)
-                if (mascotaEstado.etapa == Etapa.MUERTA) {
+            if (mascotaEstado.etapa == Etapa.MUERTA && !muerteProcesada) {
+                delay(1000L)
+                if (mascotaEstado.etapa == Etapa.MUERTA && !muerteProcesada) {
                     mostrarResumenMuerte = true
                 }
             }
         }
 
-
+/*
         LaunchedEffect(Unit) {
             while (true) {
-                delay(3 * 1000L)
+                delay(8 * 1000L)  // hacerlo mas largo considerando las etapas mas cortas
 
                 if (!enTutorial) {
-                    val nuevaEtapa = mascotaBase.determinarEtapa()
+                     nuevaEtapa = mascotaBase.determinarEtapa(etapaActual)
+
 
                     if (nuevaEtapa != etapaActual) {
                         // Mostrar animación de cambio de etapa si no es SEMILLA o SEMBRAR
                         if (!(
                                     (etapaActual == Etapa.SEMBRAR && nuevaEtapa == Etapa.SEMILLA) ||
+
+                                            (etapaActual == Etapa.MARCHITA && nuevaEtapa == Etapa.MUERTA) ||
                                             (etapaActual == Etapa.MUERTA && nuevaEtapa == Etapa.SEMBRAR) ||
-                                            (nuevaEtapa == Etapa.SEMBRAR)
+                                            (nuevaEtapa == Etapa.SEMBRAR) || (etapaActual == Etapa.SEMBRAR)
                                     )
                         ) {
                             mostrarCambioEtapa = true
@@ -796,9 +828,49 @@ fun PantallaPrincipal(viewModelHora: VistaHoraReloj, onRegresarClick: () -> Unit
                         mascotaEstado = mascotaEstado.copy(etapa = nuevaEtapa)
                         prefs.guardarMascota(mascotaEstado)
 
-                        if (nuevaEtapa == Etapa.MUERTA && !resumenMostrado) {
+                        if (nuevaEtapa == Etapa.MUERTA && !resumenMostrado && !muerteProcesada) {
                             mostrarResumenMuerte = true
                             resumenMostrado = true
+                            muerteProcesada = true
+                        }
+                    }
+                }
+            }
+        }
+*/
+        LaunchedEffect(mascotaEstado) {
+            while (true) {
+                delay(8 * 1000L)
+
+                if (!enTutorial) {
+                    val nuevaMascotaBase = when (mascotaEstado.tipoBiotamon) {
+                        1 -> MascotaPlanta(mascotaEstado)
+                        2 -> MascotaAnimal(mascotaEstado)
+                        else -> MascotaPlanta(mascotaEstado)
+                    }
+
+                    val etapaCalculada = nuevaMascotaBase.determinarEtapa(etapaActual)
+                    nuevaEtapa = etapaCalculada
+
+                    if (etapaCalculada != etapaActual) {
+                        if (!(
+                                    (etapaActual == Etapa.SEMBRAR && etapaCalculada == Etapa.SEMILLA) ||
+                                            (etapaActual == Etapa.MARCHITA && etapaCalculada == Etapa.MUERTA) ||
+                                            (etapaActual == Etapa.MUERTA && etapaCalculada == Etapa.SEMBRAR) ||
+                                            (etapaCalculada == Etapa.SEMBRAR) || (etapaActual == Etapa.SEMBRAR)
+                                    )
+                        ) {
+                            mostrarCambioEtapa = true
+                        }
+
+                        etapaActual = etapaCalculada
+                        mascotaEstado = mascotaEstado.copy(etapa = etapaCalculada)
+                        prefs.guardarMascota(mascotaEstado)
+
+                        if (etapaCalculada == Etapa.MUERTA && !resumenMostrado && !muerteProcesada) {
+                            mostrarResumenMuerte = true
+                            resumenMostrado = true
+                            muerteProcesada = true
                         }
                     }
                 }
@@ -808,14 +880,10 @@ fun PantallaPrincipal(viewModelHora: VistaHoraReloj, onRegresarClick: () -> Unit
 
 
 // Si ya tenemos una mascota viva o muerta, dibujarla siempre (aunque no estemos en tutorial)
-        if (!enTutorial || pasoTutorial >= 3) {
-
+        if (juegoIniciado || (!enTutorial || pasoTutorial >= 3)) {
             if (etapaActual == Etapa.SEMBRAR) {
-                // Mostrar animación de sembrar si estamos en etapa SEMBRAR
                 semillaPosicion?.let { DibujarAnimacionSembrar(it) }
-
             } else {
-                // Mostrar animación normal del personaje en cualquier otra etapa
                 semillaPosicion?.let {
                     PersonajeMovil(
                         tipoGeneral = tipoBiotamon,
@@ -831,9 +899,7 @@ fun PantallaPrincipal(viewModelHora: VistaHoraReloj, onRegresarClick: () -> Unit
                     )
                 }
             }
-
         } else if (enTutorial && pasoTutorial <= 3) {
-            // Si estamos en tutorial y aún no hemos sembrado, mostrar la guía de semilla
             semillaPosicion?.let { DibujarAnimacionSembrar(it) }
         }
 
@@ -1073,7 +1139,8 @@ fun PantallaPrincipal(viewModelHora: VistaHoraReloj, onRegresarClick: () -> Unit
                         etapaActual = Etapa.SEMILLA
                         // Guardar y sumar monedas
                         prefs.guardarMascota(mascotaEstado)
-
+                        prefs.guardarJuegoIniciado(true)
+                        muerteProcesada=true
                         mostrarMensajeInicio = true
                     }
                     mascotaEstado.etapa == Etapa.SEMBRAR -> {
@@ -1084,6 +1151,7 @@ fun PantallaPrincipal(viewModelHora: VistaHoraReloj, onRegresarClick: () -> Unit
                         )
                         etapaActual = Etapa.SEMILLA
 
+                        muerteProcesada=true
                         prefs.guardarMascota(mascotaEstado)
                     }
                     mascotaEstado.etapa == Etapa.MUERTA -> {
@@ -1201,40 +1269,6 @@ fun MostrarMensajeInicioPlanta(onDismiss: () -> Unit) {
 
 
 @Composable
-fun MostrarDialogoReinicioPlanta(
-    onConfirmar: () -> Unit,
-    onCancelar: () -> Unit,
-    onCambiarEspecie: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onCancelar,
-        title = { Text("☠️ Tu planta ha muerto") },
-        text = {
-            Column {
-                Text("¿Quieres sembrar una nueva semilla y comenzar otro ciclo, o prefieres cambiar de especie?")
-                Spacer(modifier = Modifier.height(16.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    OutlinedButton(onClick = onConfirmar) {
-                        Text("🌱 Resembrar")
-                    }
-                    OutlinedButton(onClick = onCambiarEspecie) {
-                        Text("🌿 Cambiar especie")
-                    }
-                    OutlinedButton(onClick = onCancelar) {
-                        Text("Cancelar")
-                    }
-                }
-            }
-        },
-        confirmButton = {}, // Vacío, ya que usamos botones personalizados
-        dismissButton = {}  // Vacío también
-    )
-}
-
-@Composable
 fun MostrarDialogoCambioBiotamon(
     tipoActual: String,
     plantaActual: String,
@@ -1349,7 +1383,7 @@ object UmbralesVida {
     const val MARCHITA =  40 * 60 * 1000L     // 5 minutos
     const val MUERTA =   45 * 60 * 1000L    // 6 minutos
 }
-fun determinarEtapa(tiempoDesdeInicio: Long): Etapa {
+fun determinarEtapa(tiempoDesdeInicio: Long, etapaActual: Etapa = Etapa.SEMBRAR): Etapa {
 
 
     return when {
