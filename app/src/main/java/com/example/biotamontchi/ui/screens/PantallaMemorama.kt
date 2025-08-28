@@ -128,7 +128,7 @@ fun CartaMemoramaLogica(
 
     Box(
         modifier = Modifier
-            .size(50.dp)
+            .size(120.dp)
             .graphicsLayer {
                 rotationY = rotacion
                 cameraDistance = 8 * density
@@ -291,7 +291,7 @@ fun TableroConCartasYLogica(audioViewModel: GameAudioViewModel2, onSalir: () -> 
                             val cartaIndex = filaIndex * 6 + colIndex
                             val cartaId = listaCompleta.getOrNull(cartaIndex)
 
-                            Box(modifier = Modifier.size(50.dp), contentAlignment = Alignment.Center) {
+                            Box(modifier = Modifier.size(58.dp), contentAlignment = Alignment.Center) {
                                 Image(
                                     painter = painterResource(id = fondoId),
                                     contentDescription = null,

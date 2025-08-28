@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
 @Composable
@@ -293,7 +294,7 @@ fun PantallaPiedraPapelTijeras(
                 index = index,
                 camino = camino,
                 imagenRes = fichaGirando.imagenRes, // toma la imagen directamente de la ficha girando
-                delayMillis = index * 300L,
+                delayMillis = index * 550L,
                 fichasGirando = fichasGirando
             )
         }
@@ -398,12 +399,21 @@ fun FichaAnimadaDesde(
     val sizePx = with(density) { 40.dp.toPx() } // tamaño en px coherente con .size(40.dp)
     val yPos = remember { Animatable(ficha.y) }
 
+
+    val distancia = (ficha.y - (-100f)).absoluteValue
+    val velocidadPxPorMs = 2f // ajusta este valor
+    val duracionReal = (distancia / velocidadPxPorMs).toInt()
+
     LaunchedEffect(Unit) {
         // Animación completa en background
         val animJob = launch {
-            yPos.animateTo(
+           /* yPos.animateTo(
                 targetValue = -100f,
                 animationSpec = tween(durationMillis = duracionMs, easing = LinearEasing)
+            )*/
+            yPos.animateTo(
+                targetValue = -100f,
+                animationSpec = tween(durationMillis = duracionReal, easing = LinearEasing)
             )
             onSalir() // si llegó arriba sin chocar
         }
@@ -478,8 +488,19 @@ fun FichaEnMovimiento(
         while (true) {
             val nextIndex = (currentIndex.value + 1) % camino.size
             val nextPoint = camino[nextIndex]
+//para ajustar en mi telefono
+           // offset.animateTo(nextPoint, animationSpec = tween(durationMillis = 150))
 
-            offset.animateTo(nextPoint, animationSpec = tween(durationMillis = 150))
+
+            //para ajustar la velocidad segun la distancia en otro
+            val distancia = (nextPoint - offset.value).getDistance()
+            val velocidadPxPorMs = 0.5f // ajusta este valor
+            val duracion = (distancia / velocidadPxPorMs).toInt()
+
+            offset.animateTo(
+                nextPoint,
+                animationSpec = tween(durationMillis = duracion)
+            )
 
             // Actualiza la posición en la lista global
             val fichaActualizada = fichasGirando.getOrNull(index)
@@ -488,7 +509,7 @@ fun FichaEnMovimiento(
             }
 
             currentIndex.value = nextIndex
-            delay(1L)
+
         }
     }
 
@@ -502,6 +523,7 @@ fun FichaEnMovimiento(
             }
     )
 }
+
 
 
 fun interpolarPuntos(a: Offset, b: Offset, pasos: Int): List<Offset> {
