@@ -32,7 +32,7 @@ fun DibujarAnimacionRiego(
     semillaPosicion: Offset,
     onAnimacionCompleta: () -> Unit
 ) {
-    val imagenBoxSize = 100.dp
+    val imagenBoxSize = 150.dp
     val density = LocalDensity.current
     val imagenBoxSizePx = with(density) { imagenBoxSize.toPx() }
     val ajusteVertical = 40
@@ -41,11 +41,11 @@ fun DibujarAnimacionRiego(
 
     // Efecto que avanza los cuadros cada 120 ms
     LaunchedEffect(Unit) {
-        while (cuadroActual < 8) {
-            delay(180)
+        while (cuadroActual < 16) {
+            delay(200)
             cuadroActual++
         }
-        delay(180)
+        delay(200)
         onAnimacionCompleta()
     }
 
@@ -58,6 +58,14 @@ fun DibujarAnimacionRiego(
         6 -> R.drawable.regar6
         7 -> R.drawable.regar7
         8 -> R.drawable.regar8
+        9 -> R.drawable.regar5
+        10 -> R.drawable.regar6
+        11 -> R.drawable.regar7
+        12-> R.drawable.regar8
+        13 -> R.drawable.regar5
+        14 -> R.drawable.regar6
+        15 -> R.drawable.regar7
+        16 -> R.drawable.regar8
         else -> R.drawable.regar1 // por seguridad, nunca debería usarse
     }
 
@@ -91,7 +99,7 @@ fun DibujarPersonajeAnimacionLoop(
     estado: String = "normal",
     semillaPosicion: Offset
 ) {
-    val imagenBoxSize = 100.dp
+    val imagenBoxSize = 150.dp
     val density = LocalDensity.current
     val imagenBoxSizePx = with(density) { imagenBoxSize.toPx() }
     val ajusteVertical = 50
@@ -140,7 +148,7 @@ fun DibujarPersonajeAnimacionLoop(
 fun DibujarAnimacionSembrar(
     semillaPosicion: Offset
 ) {
-    val imagenBoxSize = 100.dp
+    val imagenBoxSize = 150.dp
     val density = LocalDensity.current
     val imagenBoxSizePx = with(density) { imagenBoxSize.toPx() }
     val ajusteVertical = 50
@@ -194,7 +202,7 @@ fun DibujarAnimacionPlagas(
     nivelPlagas: Int,
     onAnimacionCompleta: () -> Unit
 ) {
-    val imagenBoxSize = 100.dp
+    val imagenBoxSize = 150.dp
     val density = LocalDensity.current
     val imagenBoxSizePx = with(density) { imagenBoxSize.toPx() }
     val ajusteVertical = 40
@@ -243,7 +251,7 @@ fun DibujarAnimacionBrotes(
     onAnimacionCompleta: () -> Unit
 )
 {
-    val imagenBoxSize = 100.dp
+    val imagenBoxSize = 150.dp
     val density = LocalDensity.current
     val imagenBoxSizePx = with(density) { imagenBoxSize.toPx() }
     val ajusteVertical = 40

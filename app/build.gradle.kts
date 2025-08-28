@@ -62,9 +62,12 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+    //data store en vez de sharedprefs
+    implementation ("androidx.datastore:datastore-preferences:1.0.0")
 
     // Asegúrate de tener esta dependencia para que funcione setContent
     implementation("androidx.activity:activity-compose:1.9.2")
+    implementation("androidx.core:core-animation:1.0.0")
 
     // Dependencias de test
     testImplementation("junit:junit:4.13.2")

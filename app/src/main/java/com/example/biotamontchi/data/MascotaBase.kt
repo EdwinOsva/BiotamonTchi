@@ -7,11 +7,11 @@ abstract class MascotaBase(
     abstract val tipo: String
     open val umbrales: List<Long> = listOf(
         15 * 1000L,
-        10 * 60 * 1000L,
-        15 * 60 * 1000L,
-        25 * 60 * 1000L,
-        40 * 60 * 1000L,
-        45 * 60 * 1000L,
+        1 * 60 * 60 * 1000L,
+        4 * 60 * 60 * 1000L,
+        9 * 60 * 60 * 1000L,
+        18 * 60 * 60 * 1000L,
+        27 * 60 * 60 * 1000L
     )
     open fun determinarEtapa(etapaActual: Etapa = Etapa.SEMBRAR): Etapa {
         val tiempo = System.currentTimeMillis() - datos.fechaInicioJuego
@@ -26,6 +26,11 @@ abstract class MascotaBase(
             else -> Etapa.MUERTA
         }
     }
+
+
+
+
+
     abstract fun animacionesDePlaga(nivelPlagas: Int = datos.plagas): List<Int>
     abstract fun animacionesDeBrotes(): List<Int>
     abstract fun velocidadBrotes(nutrientes: Int = datos.nutrientes): Long

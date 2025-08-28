@@ -1,6 +1,6 @@
 package com.example.biotamontchi.ui.components
 
-import android.util.Log
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,48 +13,51 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.biotamontchi.R
-
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import com.example.biotamontchi.data.Mascota
-import com.example.biotamontchi.data.MascotaBase
+import com.example.biotamontchi.data.FrutaEnPantalla
 import com.example.biotamontchi.data.PrefsManager
 import kotlinx.coroutines.delay
 
 
 @Composable
 fun PanelHerramientas(
-    mascota: Mascota,
+    nivelAgua: Int,
+    estadoActual: String,
 
-
-    monedas: MutableState<Int>,
-
-    onActualizarMonedas: (Int) -> Unit,
+    onAtomizarClick: () -> Unit,
     onPodaClick: () -> Unit,
     onRegar: () -> Unit,
     onCerrar: () -> Unit,
-    onAbrirAlimentos: () -> Unit
+    onAbrirAlimentos: () -> Unit,
+    plagas:Int,
+    monedas: MutableState<Int>,
+    onRevisarPlagas: () -> Unit
 )
 {
+    /*
     var mostrarPanelAlimentos by remember { mutableStateOf(false) }
 
+    val frutasEnPantalla = remember { mutableStateListOf<FrutaEnPantalla>() }
 
-    var context = LocalContext.current
-    var prefs = remember { PrefsManager(context) }
+    val context = LocalContext.current
+    val prefs = remember { PrefsManager(context) }
 
     val fechaUltimoRiego = prefs.obtenerLong("fechaUltimoRiego")
     val ahora = System.currentTimeMillis()
-    val intervalo = 1 * 60 * 1000L // 20 minutos en milisegundospara indicador del agua pantalla activa
+    val intervalo = 1 * 60 * 60 * 1000L // 1 hora del agua pantalla activa
     val tiempoTranscurrido = ahora - fechaUltimoRiego
     val porcentaje = tiempoTranscurrido.toFloat() / intervalo.toFloat()
 
@@ -64,20 +67,49 @@ fun PanelHerramientas(
         else -> 10 - (porcentaje * 10).toInt()
     }
 
-    var mascotaEstado by remember { mutableStateOf(prefs.cargarMascota()) }
-    val nombreRecurso by derivedStateOf { "agua$nivelAgua" }
+    var estadoActual by remember { mutableStateOf(if (nivelAgua <= 4) "seco" else "normal") }
+
+    val nombreRecurso by derivedStateOf { "agua$nivelAgua" } //aqui pasamos el primer valor al abrie el panel
     val aguaIconoId by derivedStateOf {
         context.resources.getIdentifier(nombreRecurso, "drawable", context.packageName)
     }
 
+
+
     LaunchedEffect(Unit) {
         while (true) {
-            delay(1000) // cada minuto nivel del agua
-            nivelAgua = calcularNivelAgua(prefs)
-            mascotaEstado.agua = nivelAgua
-            prefs.guardarMascota(mascota)
+            delay(30000) // cada 30 min con panel abierto, se calcula el segundo valor de agua,
+            nivelAgua = obtenerNivelAgua(prefs)
+            estadoActual = if (nivelAgua <= 4) "seco" else "normal"
+
+            prefs.guardarAgua(nivelAgua)
+            prefs.guardarEstado("estado", estadoActual)
         }
     }
+
+*/
+
+
+    var mostrarPanelAlimentos by remember { mutableStateOf(false) }
+    val frutasEnPantalla = remember { mutableStateListOf<FrutaEnPantalla>() }
+
+    val context = LocalContext.current
+    val prefs = remember { PrefsManager(context) }
+    val nombreRecurso by remember(nivelAgua) { derivedStateOf { "agua$nivelAgua" } }
+    val aguaIconoId by remember(nombreRecurso) {
+        derivedStateOf {
+            context.resources.getIdentifier(nombreRecurso, "drawable", context.packageName)
+        }
+    }
+
+
+
+
+
+
+
+
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -142,26 +174,11 @@ fun PanelHerramientas(
                                 .size(100.dp)
                                 .clickable {
 
-                                   val totalRiegos = mascotaEstado.riegos + 1
-
-                                    // Actualizamos la mascota
-                                    mascotaEstado = mascotaEstado.copy(
-                                        agua = 10,
-                                        riegos = totalRiegos,
-                                        fechaUltimoRiego = ahora
-                                    )
-
-                                    // Guardamos en preferencias
-                                    prefs.guardarMascota(mascotaEstado)
-
-                                    // Monedas
-                                    monedas.value += 10
-                                    prefs.guardarMonedas(monedas.value)
-
-                                    onActualizarMonedas(monedas.value)
-
-
                                     onRegar()
+
+
+
+
 
                                     onCerrar()
                                 }
@@ -177,16 +194,22 @@ fun PanelHerramientas(
                         horizontalArrangement = Arrangement.SpaceEvenly,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        val iconoPlagas = if (plagas < 4) R.drawable.bichos1 else R.drawable.bichos2
+
                         Image(
-                            painter = painterResource(id = R.drawable.bichos2),
+                            painter = painterResource(id = iconoPlagas),
                             contentDescription = "Botón inspección",
                             modifier = Modifier
                                 .size(60.dp)
                                 .clickable {
-                                    // Acción para regresar
-                               //     revisar()
-                                }
+                                    // Acción para entrar al minijuego o revisar
+                                    if (plagas >= 4) {
+                                        onRevisarPlagas()
+                                        }
+                                    }
+
                         )
+
                         Image(
                             painter = painterResource(id = R.drawable.atomizar),
                             contentDescription = "Botón insecticida",
@@ -194,7 +217,8 @@ fun PanelHerramientas(
                                 .size(60.dp)
                                 .clickable {
                                     // Acción para regresar
-                                   // atomizar()
+                                    onAtomizarClick()
+                                    onCerrar()
                                 }
                         )
                         Text(
@@ -227,6 +251,7 @@ fun PanelHerramientas(
                                 .size(60.dp)
                                 .clickable {
                                     onPodaClick()
+                                    onCerrar()
                                 }
                         )
 
@@ -245,6 +270,12 @@ fun PanelHerramientas(
 
 
     if (mostrarPanelAlimentos) {
-        PanelAlimentos( mascota = mascotaEstado, onCerrar = { mostrarPanelAlimentos = false })
+        PanelAlimentos(
+            onCerrar = { mostrarPanelAlimentos = false },
+            frutasEnPantalla = frutasEnPantalla,
+            prefs = prefs,
+            monedas = monedas
+        )
     }
 }
+

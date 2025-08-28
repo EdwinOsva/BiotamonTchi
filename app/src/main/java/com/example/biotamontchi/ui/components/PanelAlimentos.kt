@@ -1,34 +1,38 @@
 package com.example.biotamontchi.ui.components
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.biotamontchi.R
-
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
-import com.example.biotamontchi.data.Mascota
+import com.example.biotamontchi.data.FrutaEnPantalla
+import com.example.biotamontchi.data.PrefsManager
+import com.example.biotamontchi.data.alimentar
+import com.example.biotamontchi.data.frutasDisponibles
 
 
 @Composable
 fun PanelAlimentos(
-    mascota: Mascota,
-    onCerrar: () -> Unit
+    onCerrar: () -> Unit,
+    frutasEnPantalla: MutableList<FrutaEnPantalla>,
+    prefs: PrefsManager,
+    monedas: MutableState<Int>
 ) {
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp
+    val screenHeight = configuration.screenHeightDp
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -87,11 +91,24 @@ fun PanelAlimentos(
                                 .size(50.dp)
                                 .clickable {
                                     // Acción para regresar
-                                    // premio1()
+
+                                    alimentar(
+                                        frutasDisponibles[0],
+                                        frutasEnPantalla,
+                                        prefs,
+                                        monedas,
+                                        screenWidth,
+                                        screenHeight
+
+                                    )
+
+
+
+                                    onCerrar()
                                 }
                         )
                         Text(
-                            text = "$5",
+                            text = "$${frutasDisponibles[0].costo}",
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
                             color = Color.White
@@ -103,11 +120,21 @@ fun PanelAlimentos(
                                 .size(50.dp)
                                 .clickable {
                                     // Acción para regresar
-                                    // premio1()
+                                    alimentar(
+                                        frutasDisponibles[1],
+                                        frutasEnPantalla,
+                                        prefs,
+                                        monedas,
+                                        screenWidth,
+                                        screenHeight
+                                    )
+
+
+                                    onCerrar()
                                 }
                         )
                         Text(
-                            text = "$6",
+                            text = "$${frutasDisponibles[1].costo}",
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
                             color = Color.White
@@ -120,11 +147,21 @@ fun PanelAlimentos(
                                 .size(50.dp)
                                 .clickable {
                                     // Acción para regresar
-                                    // premio1()
+                                    alimentar(
+                                        frutasDisponibles[2],
+                                        frutasEnPantalla,
+                                        prefs,
+                                        monedas,
+                                        screenWidth,
+                                        screenHeight
+                                    )
+
+
+                                    onCerrar()
                                 }
                         )
                         Text(
-                            text = "$6",
+                            text = "$${frutasDisponibles[2].costo}",
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
                             color = Color.White
@@ -136,12 +173,22 @@ fun PanelAlimentos(
                                 .size(50.dp)
                                 .clickable {
                                     // Acción para regresar
-                                    // premio1()
+                                    alimentar(
+                                        frutasDisponibles[3],
+                                        frutasEnPantalla,
+                                        prefs,
+                                        monedas,
+                                        screenWidth,
+                                        screenHeight
+                                    )
+
+
+                                    onCerrar()
                                 }
                         )
 
                         Text(
-                            text = "$7",
+                            text = "$${frutasDisponibles[3].costo}",
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
                             color = Color.White
@@ -160,11 +207,21 @@ fun PanelAlimentos(
                                 .size(100.dp)
                                 .clickable {
                                     // Acción para regresar
-                                    // premio1()
+                                    alimentar(
+                                        frutasDisponibles[4],
+                                        frutasEnPantalla,
+                                        prefs,
+                                        monedas,
+                                        screenWidth,
+                                        screenHeight
+                                    )
+
+
+                                    onCerrar()
                                 }
                         )
                         Text(
-                            text = "$9",
+                            text = "$${frutasDisponibles[4].costo}",
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
                             color = Color.White
@@ -176,11 +233,21 @@ fun PanelAlimentos(
                                 .size(70.dp)
                                 .clickable {
                                     // Acción para regresar
-                                    // premio1()
+                                    alimentar(
+                                        frutasDisponibles[5],
+                                        frutasEnPantalla,
+                                        prefs,
+                                        monedas,
+                                        screenWidth,
+                                        screenHeight
+                                    )
+
+
+                                    onCerrar()
                                 }
                         )
                         Text(
-                            text = "$10",
+                            text = "$${frutasDisponibles[5].costo}",
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
                             color = Color.White
@@ -192,11 +259,21 @@ fun PanelAlimentos(
                                 .size(70.dp)
                                 .clickable {
                                     // Acción para regresar
-                                    // premio1()
+                                    alimentar(
+                                        frutasDisponibles[6],
+                                        frutasEnPantalla,
+                                        prefs,
+                                        monedas,
+                                        screenWidth,
+                                        screenHeight
+                                    )
+
+
+                                    onCerrar()
                                 }
                         )
                         Text(
-                            text = "$12",
+                            text = "$${frutasDisponibles[6].costo}",
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
                             color = Color.White
@@ -215,11 +292,21 @@ fun PanelAlimentos(
                                 .size(70.dp)
                                 .clickable {
                                     // Acción para regresar
-                                    // premio1()
+                                    alimentar(
+                                        frutasDisponibles[7],
+                                        frutasEnPantalla,
+                                        prefs,
+                                        monedas,
+                                        screenWidth,
+                                        screenHeight
+                                    )
+
+
+                                    onCerrar()
                                 }
                         )
                         Text(
-                            text = "$13",
+                            text = "$${frutasDisponibles[7].costo}",
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
                             color = Color.White
@@ -231,11 +318,21 @@ fun PanelAlimentos(
                                 .size(50.dp)
                                 .clickable {
                                     // Acción para regresar
-                                    // premio1()
+                                    alimentar(
+                                        frutasDisponibles[8],
+                                        frutasEnPantalla,
+                                        prefs,
+                                        monedas,
+                                        screenWidth,
+                                        screenHeight
+                                    )
+
+
+                                    onCerrar()
                                 }
                         )
                         Text(
-                            text = "$14",
+                            text = "$${frutasDisponibles[8].costo}",
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
                             color = Color.White
@@ -247,11 +344,21 @@ fun PanelAlimentos(
                                 .size(70.dp)
                                 .clickable {
                                     // Acción para regresar
-                                    // premio1()
+                                    alimentar(
+                                        frutasDisponibles[9],
+                                        frutasEnPantalla,
+                                        prefs,
+                                        monedas,
+                                        screenWidth,
+                                        screenHeight
+                                    )
+
+
+                                    onCerrar()
                                 }
                         )
                         Text(
-                            text = "$14",
+                            text = "$${frutasDisponibles[9].costo}",
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
                             color = Color.White
@@ -270,11 +377,21 @@ fun PanelAlimentos(
                                 .size(50.dp)
                                 .clickable {
                                     // Acción para regresar
-                                    // premio1()
+                                    alimentar(
+                                        frutasDisponibles[10],
+                                        frutasEnPantalla,
+                                        prefs,
+                                        monedas,
+                                        screenWidth,
+                                        screenHeight
+                                    )
+
+
+                                    onCerrar()
                                 }
                         )
                         Text(
-                            text = "$15",
+                            text = "$${frutasDisponibles[10].costo}",
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
                             color = Color.White
@@ -286,11 +403,21 @@ fun PanelAlimentos(
                                 .size(80.dp)
                                 .clickable {
                                     // Acción para regresar
-                                    // premio1()
+                                    alimentar(
+                                        frutasDisponibles[11],
+                                        frutasEnPantalla,
+                                        prefs,
+                                        monedas,
+                                        screenWidth,
+                                        screenHeight
+                                    )
+
+
+                                    onCerrar()
                                 }
                         )
                         Text(
-                            text = "$15",
+                            text = "$${frutasDisponibles[11].costo}",
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
                             color = Color.White
@@ -302,11 +429,21 @@ fun PanelAlimentos(
                                 .size(60.dp)
                                 .clickable {
                                     // Acción para regresar
-                                    // premio1()
+                                    alimentar(
+                                        frutasDisponibles[12],
+                                        frutasEnPantalla,
+                                        prefs,
+                                        monedas,
+                                        screenWidth,
+                                        screenHeight
+                                    )
+
+
+                                    onCerrar()
                                 }
                         )
                         Text(
-                            text = "$17",
+                            text = "$${frutasDisponibles[12].costo}",
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
                             color = Color.White

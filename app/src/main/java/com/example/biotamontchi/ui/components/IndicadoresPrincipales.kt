@@ -19,7 +19,7 @@ import com.example.biotamontchi.R
 import com.example.biotamontchi.data.PrefsManager
 
 //agua
-fun calcularNivelAgua(prefs: PrefsManager, intervalo: Long = 1 * 60 * 1000): Int {
+fun calcularNivelAgua(prefs: PrefsManager, intervalo: Long = 1 * 60 * 60 * 1000): Int {
     val fechaUltimoRiego = prefs.obtenerLong("fechaUltimoRiego")
     val ahora = System.currentTimeMillis()
     val transcurrido = ahora - fechaUltimoRiego

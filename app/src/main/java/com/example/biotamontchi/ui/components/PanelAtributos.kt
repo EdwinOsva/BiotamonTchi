@@ -90,7 +90,11 @@ fun PanelAtributos(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Columna 1: Nombre
+                            val unidades = if (valor % 10 == 0 && valor != 0) 10 else valor % 10
+
+                            val decenas = valor / 10
+
+                            // Nombre del atributo
                             Text(
                                 text = nombre,
                                 modifier = Modifier.weight(2.5f),
@@ -98,9 +102,9 @@ fun PanelAtributos(
                                 fontWeight = FontWeight.Bold
                             )
 
-                            // Columna 2: Imagen (más ancha)
+                            // Indicador visual (unidades)
                             Image(
-                                painter = painterResource(id = getIndicadorResource(valor)),
+                                painter = painterResource(id = getIndicadorResource(unidades)),
                                 contentDescription = "Indicador",
                                 modifier = Modifier
                                     .weight(3.5f)
@@ -109,9 +113,9 @@ fun PanelAtributos(
                                 contentScale = ContentScale.FillWidth
                             )
 
-                            // Columna 3: Valor
+                            // Nivel en decenas
                             Text(
-                                text = valor.toString(),
+                                text = "Lv $decenas", // O simplemente decenas.toString() si no quieres "Lv"
                                 modifier = Modifier.weight(1f),
                                 style = TextStyle(
                                     fontSize = 16.sp,
@@ -120,8 +124,8 @@ fun PanelAtributos(
                                 )
                             )
                         }
-
                     }
+
                 }
             }
         }

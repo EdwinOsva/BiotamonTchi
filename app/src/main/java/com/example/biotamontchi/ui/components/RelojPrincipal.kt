@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
@@ -17,7 +18,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.example.biotamontchi.R
 import com.example.biotamontchi.data.PrefsManager
-import com.example.biotamontchi.viewmodel.GameAudioViewModel
+import com.example.biotamontchi.model.GameAudioViewModel2
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun MostrarImagenReloj(hora: Int, modifier: Modifier = Modifier) {
@@ -44,14 +47,16 @@ fun MostrarImagenReloj(hora: Int, modifier: Modifier = Modifier) {
         contentScale = ContentScale.Fit
     )
 }
-
 @Composable
 fun RelojConControles(
     hora: Int,
-    audioViewModel: GameAudioViewModel? = null,
+    audioViewModel: GameAudioViewModel2? = null,
     prefs: PrefsManager? = null,
-    mostrarDialogo: MutableState<Boolean>? = null
+    mostrarDialogo: MutableState<Boolean>? = null,
+    mostrarVolumen: MutableState<Boolean>? = null
 ) {
+    val scope = rememberCoroutineScope()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -71,6 +76,13 @@ fun RelojConControles(
                                 } else {
                                     it.startBackgroundMusic()
                                 }
+                            }
+
+                            // Mostrar volumen por 2 segundos
+                            mostrarVolumen?.value = true
+                            scope.launch {
+                                delay(2000)
+                                mostrarVolumen?.value = false
                             }
                         },
                         onLongPress = {

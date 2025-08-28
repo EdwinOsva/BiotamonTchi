@@ -31,10 +31,21 @@ data class Mascota(
     var posicion: Offset? = null,
     var etapaMaxima: Etapa = Etapa.SEMBRAR,
     var tipoBiotamon: Int, // 1 = planta, 2 = animal, etc.
-    var especie: String // por ejemplo: "margarita", "lili", etc.
+    var especie: String, // por ejemplo: "margarita", "lili", etc.
+    var estado:String = "normal",
+    var puntos:Int =0,
 
+    // 👇 nuevo
+    var causaMuerte: CausaMuerte = CausaMuerte.NINGUNA
 )
-
+enum class CausaMuerte {
+    NINGUNA,
+    DESCUIDO_SEQUIA,
+    DESCUIDO_EXCESO_AGUA,
+    DESCUIDO_NUTRIENTES,
+    DESCUIDO_PLAGAS,
+    VIEJA
+}
 class MascotaPlanta(
     override val datos: Mascota
 ) : MascotaBase(datos) {
@@ -43,12 +54,12 @@ class MascotaPlanta(
         get() = "planta"
 
     override val umbrales = listOf(
-        10 * 1000L,
-        1 * 60 * 1000L,
-        3 * 60 * 1000L,
-        5 * 60 * 1000L,
-        8 * 60 * 1000L,
-        10 * 60 * 1000L
+        15 * 1000L,
+        1 * 60 * 60 * 1000L,
+        4 * 60 * 60 * 1000L,
+        12 * 60 * 60 * 1000L,
+        22 * 60 * 60 * 1000L,
+        23 * 60 * 60 * 1000L
     )
 
     override fun determinarEtapa(etapaActual: Etapa): Etapa {
@@ -66,7 +77,7 @@ class MascotaPlanta(
     }
 
     override fun animacionesDePlaga(nivelPlagas: Int): List<Int> {
-        return if (nivelPlagas > 6) {
+        return if (nivelPlagas > 7 ) {
             listOf(R.drawable.insectos1, R.drawable.insectos2, R.drawable.insectos3, R.drawable.insectos4)
         } else {
             listOf(R.drawable.insectos01, R.drawable.insectos02, R.drawable.insectos03, R.drawable.insectos04)
@@ -96,12 +107,12 @@ class MascotaAnimal(
         get() = "animal"
 
     override val umbrales = listOf(
-        10 * 1000L,
-        1 * 60 * 1000L,
-        3 * 60 * 1000L,
-        5 * 60 * 1000L,
-        8 * 60 * 1000L,
-        10 * 60 * 1000L
+        15 * 1000L,
+        1 * 60 * 60 * 1000L,
+        4 * 60 * 60 * 1000L,
+        12 * 60 * 60 * 1000L,
+        22 * 60 * 60 * 1000L,
+        23 * 60 * 60 * 1000L
     )
     override fun animacionesDePlaga(nivelPlagas: Int): List<Int> {
         // Animaciones específicas para animales con o sin parásitos
@@ -138,5 +149,7 @@ enum class Etapa {
     MARCHITA,
     MUERTA
 }
+
+
 
 

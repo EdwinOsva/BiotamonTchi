@@ -1,5 +1,6 @@
 package com.example.biotamontchi.ui.screens
 
+import android.app.Application
 import android.view.MotionEvent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -23,10 +24,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.biotamontchi.model.ControlVolumenDrag
+import com.example.biotamontchi.model.GameAudioViewModel2
+import com.example.biotamontchi.model.GameAudioViewModelFactory
 import com.example.biotamontchi.ui.components.FondoDinamico
-import com.example.biotamontchi.ui.components.MostrarImagenReloj
 import com.example.biotamontchi.ui.components.RelojConControles
-import com.example.biotamontchi.viewmodel.GameAudioViewModel
 import com.example.biotamontchi.viewmodel.VistaHoraReloj
 import kotlinx.coroutines.delay
 import kotlin.random.Random
@@ -38,7 +42,7 @@ fun MenuInicial(
     onStartClick: () -> Unit,
     onExitClick: () -> Unit,
     viewmodel: VistaHoraReloj,
-    audioViewModel: GameAudioViewModel
+    audioViewModel: GameAudioViewModel2
 ) {
     var startPressed by remember { mutableStateOf(false) }
     var exitPressed by remember { mutableStateOf(false) }
@@ -60,15 +64,33 @@ fun MenuInicial(
         // 🕒 Imagen del reloj en la esquina superior izquierda
         Box(
             modifier = Modifier
-
                 .fillMaxSize()
-                .padding(8.dp),
+                .padding(1.dp),
             contentAlignment = Alignment.TopStart
         ) {
+            val context = LocalContext.current.applicationContext as Application
+
+            val audioViewModel2: GameAudioViewModel2 = viewModel(factory = GameAudioViewModelFactory(context.applicationContext as Application))
+
             RelojConControles(
                 hora = hora12,
-                audioViewModel = audioViewModel
+                audioViewModel = audioViewModel2,
+
             )
+            val mostrarVolumen = remember { mutableStateOf(false) }
+
+            if (mostrarVolumen.value) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(start = 16.dp, top = 120.dp),
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.Top
+                ) {
+                    ControlVolumenDrag(audioViewModel = audioViewModel2)
+                }
+            }
+
 
         }
 

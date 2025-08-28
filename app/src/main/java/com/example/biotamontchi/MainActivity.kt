@@ -6,58 +6,54 @@ import androidx.activity.compose.setContent
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import com.example.biotamontchi.ui.screens.MenuInicial
 import com.example.biotamontchi.ui.theme.BiotamonTchiTheme
 import com.example.biotamontchi.viewmodel.VistaHoraReloj
 
-import com.example.biotamontchi.viewmodel.GameAudioViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.biotamontchi.ui.screens.PantallaPrincipal
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-
-
+import com.example.biotamontchi.model.GameAudioViewModel2
+import com.example.biotamontchi.viewmodel.SplashBiotamontchi
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
             BiotamonTchiTheme {
-                // A surface container using the 'background' color from the theme
-                val relojViewModel: VistaHoraReloj = viewModel()
-                val audioViewModel: GameAudioViewModel = viewModel()
+                var showSplash by remember { mutableStateOf(true) }
 
-
-                var mostrarPantallaJuego by rememberSaveable { mutableStateOf(false) }
-                if (mostrarPantallaJuego) {
-                    PantallaPrincipal(
-                        viewModelHora = relojViewModel,
-                        onRegresarClick = {
-                            mostrarPantallaJuego = false // <- Regresa al menú
-                        }
-                    )
+                if (showSplash) {
+                    SplashBiotamontchi {
+                        showSplash = false
+                    }
                 } else {
-                    MenuInicial(
-                        onStartClick = {
+                    // tu app normal
+                    val relojViewModel: VistaHoraReloj = viewModel()
+                    val audioViewModel: GameAudioViewModel2 = viewModel()
 
-                            mostrarPantallaJuego = true
-                        },
-                        onExitClick = {
+                    var mostrarPantallaJuego by rememberSaveable { mutableStateOf(false) }
 
-                            finish()
-                        },
-                        viewmodel = relojViewModel,
-                        audioViewModel = audioViewModel // <--- este es el que faltaba
-                    )
+                    if (mostrarPantallaJuego) {
+                        PantallaPrincipal(
+                            viewModelHora = relojViewModel,
+                            onRegresarClick = { mostrarPantallaJuego = false }
+                        )
+                    } else {
+                        MenuInicial(
+                            onStartClick = { mostrarPantallaJuego = true },
+                            onExitClick = { finish() },
+                            viewmodel = relojViewModel,
+                            audioViewModel = audioViewModel
+                        )
+                    }
+
+                    LaunchedEffect(Unit) {
+                        audioViewModel.startBackgroundMusic()
+                    }
                 }
-
-
-                // Iniciar música de fondo al abrir app
-                LaunchedEffect(Unit) {
-                    audioViewModel.startBackgroundMusic()
-                }
-
-
             }
         }
     }
