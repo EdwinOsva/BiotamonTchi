@@ -1069,7 +1069,7 @@ var papaloteActivo by remember { mutableStateOf<PremioEnPantalla?>(null) }
 
 
                                             TipoPremio.PAPALOTE -> {
-                                                audioViewModel2.reproducirEfecto(R.raw.viento1)
+                                                audioViewModel2.reproducirEfecto(R.raw.viento)
                                                 papaloteActivo = premioEnPantalla // << lo usaremos luego para dibujarlo
                                                 premiosAEliminar.add(premioEnPantalla) // elimina después de la animación
                                             }
@@ -1590,7 +1590,7 @@ var papaloteActivo by remember { mutableStateOf<PremioEnPantalla?>(null) }
                     }
             )
             Image(
-                painter = painterResource(R.drawable.maricaabajo),
+                painter = painterResource(R.drawable.marica),
                 contentDescription = "Otro icono",
                 modifier = Modifier
                     .size(50.dp)

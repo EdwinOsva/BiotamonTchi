@@ -41,12 +41,14 @@ class GameAudioViewModel2(application: Application) : AndroidViewModel(applicati
 
     fun startBackgroundMusic(resId: Int = R.raw.ambiente3) {
         mediaPlayer?.release()
-        mediaPlayer = MediaPlayer.create(context, resId).apply {
-            isLooping = true
-            setVolume(volumen, volumen)
-            start()
+        mediaPlayer = MediaPlayer.create(context, resId)
+        mediaPlayer?.let {
+            it.isLooping = true
+            it.setVolume(volumen, volumen)
+            it.start()
         }
     }
+
 
 
     fun reproducirEfecto(resId: Int) {
@@ -62,7 +64,7 @@ class GameAudioViewModel2(application: Application) : AndroidViewModel(applicati
     fun playClickSound() {
         viewModelScope.launch(Dispatchers.IO) {
             clickPlayer?.release()
-            clickPlayer = MediaPlayer.create(context, R.raw.clic2)
+            clickPlayer = MediaPlayer.create(context, R.raw.clic1)
             clickPlayer?.start()
         }
     }

@@ -310,11 +310,11 @@ fun TableroConCartasYLogica(audioViewModel: GameAudioViewModel2, onSalir: () -> 
                                                 if (primeraSeleccion == null) {
                                                     primeraSeleccion = cartaIndex
                                                     cartasVolteadas[cartaIndex] = true
-                                                    audioViewModel.reproducirEfecto(R.raw.clic2)
+                                                    audioViewModel.reproducirEfecto(R.raw.clic1)
                                                 } else if (segundaSeleccion == null && cartaIndex != primeraSeleccion) {
                                                     segundaSeleccion = cartaIndex
                                                     cartasVolteadas[cartaIndex] = true
-                                                    audioViewModel.reproducirEfecto(R.raw.clic2)
+                                                    audioViewModel.reproducirEfecto(R.raw.clic1)
                                                 }
                                             }
                                         }

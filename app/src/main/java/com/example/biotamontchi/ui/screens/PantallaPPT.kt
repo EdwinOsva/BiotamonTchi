@@ -134,12 +134,6 @@ fun PantallaPiedraPapelTijeras(
     val mensajeFinal = remember { mutableStateOf<String?>(null) }
     val monedasGanadas = remember { mutableStateOf(0) }
 
-    fun eliminarFichaCamino(ficha: FichaEnMovimiento) {
-        val index = fichasGirando.indexOfFirst { it.id == ficha.id }
-        if (index != -1) {
-            fichasGirando[index] = fichasGirando[index].copy(activo = false)
-        }
-    }
 
     Box(
         modifier = Modifier
@@ -263,13 +257,15 @@ fun PantallaPiedraPapelTijeras(
                     monedas = monedas,
                     monedasGanadas = monedasGanadas,
                     prefs = prefs,
+                    duracionMs = 1000,
                     onEliminarFichaCamino = { fichaGirando -> fichasGirando.removeIf { it.id == fichaGirando.id } },
-                    onSalir = { fichasEnMovimientoCentro.remove(ficha) },
-                    onMostrarMensaje = { texto -> mensajeResultado.value = texto },
-                    velocidadFactor = 0.7f // 👈 más lento
+                    onSalir = { fichasEnMovimientoCentro.remove(ficha) }, // o inferior según corresponda
+                    onMostrarMensaje = { texto -> mensajeResultado.value = texto } // <-- pasar el callback
                 )
+
             }
         }
+
 
         fichasEnMovimientoInferior.forEach { ficha ->
             key(ficha.id) {
@@ -280,37 +276,27 @@ fun PantallaPiedraPapelTijeras(
                     monedas = monedas,
                     monedasGanadas = monedasGanadas,
                     prefs = prefs,
+                    duracionMs = 1500,
                     onEliminarFichaCamino = { fichaGirando -> fichasGirando.removeIf { it.id == fichaGirando.id } },
-                    onSalir = { fichasEnMovimientoInferior.remove(ficha) },
-                    onMostrarMensaje = { texto -> mensajeResultado.value = texto },
-                    velocidadFactor = 1.0f // 👈 normal
+                    onSalir = { fichasEnMovimientoInferior.remove(ficha) }, // o inferior según corresponda
+                    onMostrarMensaje = { texto -> mensajeResultado.value = texto } // <-- pasar el callback
                 )
+
             }
         }
+
+
+
 
         fichasGirando.forEachIndexed { index, fichaGirando ->
-            if (fichaGirando.activo) {
-                FichaEnMovimiento(
-                    index = index,
-                    camino = camino,
-                    imagenRes = fichaGirando.imagenRes,
-                    delayMillis = index * 300L,
-                    fichasGirando = fichasGirando
-                )
-            }
+            FichaEnMovimiento(
+                index = index,
+                camino = camino,
+                imagenRes = fichaGirando.imagenRes, // toma la imagen directamente de la ficha girando
+                delayMillis = index * 300L,
+                fichasGirando = fichasGirando
+            )
         }
-
-
-        /*
-                fichasGirando.forEachIndexed { index, fichaGirando ->
-                    FichaEnMovimiento(
-                        index = index,
-                        camino = camino,
-                        imagenRes = fichaGirando.imagenRes, // toma la imagen directamente de la ficha girando
-                        delayMillis = index * 300L,
-                        fichasGirando = fichasGirando
-                    )
-                }*/
 
         LaunchedEffect(mensajeResultado.value) {
             if (mensajeResultado.value != null) {
@@ -394,6 +380,7 @@ fun PantallaPiedraPapelTijeras(
     }
 
 }
+
 @Composable
 fun FichaAnimadaDesde(
     audioViewModel: GameAudioViewModel2,
@@ -402,65 +389,63 @@ fun FichaAnimadaDesde(
     monedas: MutableState<Int>,
     monedasGanadas: MutableState<Int>,
     prefs: PrefsManager,
+    duracionMs: Int,
     onEliminarFichaCamino: (FichaEnMovimiento) -> Unit,
     onSalir: () -> Unit,
-    onMostrarMensaje: (String) -> Unit,
-    velocidadFactor: Float = 1f // 👈 nuevo
+    onMostrarMensaje: (String) -> Unit // ← nuevo
 ) {
     val density = LocalDensity.current
-    val sizePx = with(density) { 40.dp.toPx() }
+    val sizePx = with(density) { 40.dp.toPx() } // tamaño en px coherente con .size(40.dp)
     val yPos = remember { Animatable(ficha.y) }
 
-
     LaunchedEffect(Unit) {
-        val distancia = ficha.y - (-100f)
-        val velocidadPxPorMs = 1.0f * velocidadFactor // 👈 ajustamos la velocidad
-        val duracion = (distancia / velocidadPxPorMs).toInt()
-
+        // Animación completa en background
         val animJob = launch {
             yPos.animateTo(
                 targetValue = -100f,
-                animationSpec = tween(durationMillis = duracion, easing = LinearEasing)
+                animationSpec = tween(durationMillis = duracionMs, easing = LinearEasing)
             )
-            onSalir()
+            onSalir() // si llegó arriba sin chocar
         }
 
-        snapshotFlow { yPos.value }.collect { currentY ->
-            val choque = fichasGirando.firstOrNull { fichaCamino ->
-                val rectLanzada = Rect(Offset(ficha.x, currentY), Size(sizePx, sizePx))
-                val rectGirando = Rect(Offset(fichaCamino.x, fichaCamino.y), Size(sizePx, sizePx))
-                rectLanzada.overlaps(rectGirando)
-            }
+        // Observamos el valor animado y chequeamos colisión (con hitbox en px)
+        snapshotFlow { yPos.value }
+            .collect { currentY ->
+                val choque = fichasGirando.firstOrNull { fichaCamino ->
+                    val rectLanzada = Rect(Offset(ficha.x, currentY), Size(sizePx, sizePx))
+                    val rectGirando = Rect(Offset(fichaCamino.x, fichaCamino.y), Size(sizePx, sizePx))
+                    rectLanzada.overlaps(rectGirando)
+                }
 
-            if (choque != null) {
-                animJob.cancel()
-                when (resultadoPPT(ficha.imagenRes, choque.imagenRes)) {
-                    ResultadoPPT.GANAR -> {
-                        monedas.value += 5
-                        monedasGanadas.value += 5
-                        audioViewModel.reproducirEfecto(R.raw.ganar_par)
-                        prefs.guardarMonedas(monedas.value)
-
-                        onEliminarFichaCamino(choque)
-                        onMostrarMensaje("¡Ganaste!  :D")
-                        onSalir()
-                    }
-                    ResultadoPPT.EMPATE -> {
-                        monedas.value += 2
-                        audioViewModel.reproducirEfecto(R.raw.clic3)
-                        prefs.guardarMonedas(monedas.value)
-                        onEliminarFichaCamino(choque)
-                        onMostrarMensaje("Empate  :/")
-                        onSalir()
-                    }
-                    ResultadoPPT.PERDER -> {
-                        audioViewModel.reproducirEfecto(R.raw.clic5)
-                        onMostrarMensaje("Perdiste  :(")
-                        onSalir()
+                if (choque != null) {
+                    animJob.cancel() // paramos la animación
+                    when (resultadoPPT(ficha.imagenRes, choque.imagenRes)) {
+                        ResultadoPPT.GANAR -> {
+                            monedas.value += 5
+                            monedasGanadas.value += 5
+                            audioViewModel.reproducirEfecto(R.raw.ganar_par) // sonido de click
+                            prefs.guardarMonedas(monedas.value)
+                            onEliminarFichaCamino(choque)    // quita la que gira
+                            onMostrarMensaje("¡Ganaste!  :D")
+                            onSalir()
+                        // quita la lanzada
+                        }
+                        ResultadoPPT.EMPATE -> {
+                            monedas.value += 2
+                            audioViewModel.reproducirEfecto(R.raw.clic3) // sonido de click
+                            prefs.guardarMonedas(monedas.value)
+                            onEliminarFichaCamino(choque)
+                            onMostrarMensaje("Empate  :/")
+                            onSalir()
+                        }
+                        ResultadoPPT.PERDER -> {
+                            audioViewModel.reproducirEfecto(R.raw.clic5) // sonido de click
+                            onMostrarMensaje("Perdiste  :(")
+                            onSalir() // solo se quita la lanzada; la que gira queda
+                        }
                     }
                 }
             }
-        }
     }
 
     Image(
@@ -474,7 +459,6 @@ fun FichaAnimadaDesde(
             }
     )
 }
-
 
 
 
@@ -495,19 +479,11 @@ fun FichaEnMovimiento(
             val nextIndex = (currentIndex.value + 1) % camino.size
             val nextPoint = camino[nextIndex]
 
-            val distancia = (nextPoint - offset.value).getDistance()
-            val velocidadPxPorMs = 0.5f // ajusta este valor: px que recorre por milisegundo
-            val duracion = (distancia / velocidadPxPorMs).toInt()
-
-            offset.animateTo(
-                targetValue = nextPoint,
-                animationSpec = tween(durationMillis = duracion, easing = LinearEasing)
-            )
+            offset.animateTo(nextPoint, animationSpec = tween(durationMillis = 150))
 
             // Actualiza la posición en la lista global
             val fichaActualizada = fichasGirando.getOrNull(index)
             if (fichaActualizada != null) {
-
                 fichasGirando[index] = fichaActualizada.copy(x = nextPoint.x, y = nextPoint.y)
             }
 
@@ -528,8 +504,6 @@ fun FichaEnMovimiento(
 }
 
 
-
-
 fun interpolarPuntos(a: Offset, b: Offset, pasos: Int): List<Offset> {
     return List(pasos) { i ->
         val t = i / pasos.toFloat()
@@ -541,13 +515,11 @@ fun interpolarPuntos(a: Offset, b: Offset, pasos: Int): List<Offset> {
 }
 
 data class FichaEnMovimiento(
-    val id: Int,
-    val imagenRes: Int,
+    val id: Int,        // identificador único de la ficha
+    val imagenRes: Int, // imagen de la ficha
     val x: Float,
-    val y: Float,
-    val activo: Boolean = true
+    val y: Float
 )
-
 
 data class Ficha(
     val id: Int,           // ID único
@@ -578,5 +550,18 @@ fun resultadoPPT(idLanzada: Int, idFija: Int): ResultadoPPT {
 enum class ResultadoPPT { GANAR, EMPATE, PERDER }
 
 
+fun colisiona(f1: FichaEnMovimiento, f2: FichaEnMovimiento): Boolean {
+    val size = 40f // el tamaño de la ficha en px (ajusta si es distinto)
 
+    val rect1 = Rect(
+        offset = Offset(f1.x, f1.y),
+        size = Size(size, size)
+    )
 
+    val rect2 = Rect(
+        offset = Offset(f2.x, f2.y),
+        size = Size(size, size)
+    )
+
+    return rect1.overlaps(rect2)
+}

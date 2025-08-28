@@ -93,7 +93,7 @@ class MascotaPlanta(
     }
 
     override fun sonidoCuidado(): Int {
-        return R.raw.clic2
+        return R.raw.clic1
     }
 }
 
@@ -134,7 +134,7 @@ class MascotaAnimal(
     }
 
     override fun sonidoCuidado(): Int {
-        return R.raw.clic2 // agrega un sonido distinto al de las plantas
+        return R.raw.clic1 // agrega un sonido distinto al de las plantas
     }
 
 }

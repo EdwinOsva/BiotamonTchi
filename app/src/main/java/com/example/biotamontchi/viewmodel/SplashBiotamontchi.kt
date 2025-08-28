@@ -36,7 +36,7 @@ fun SplashBiotamontchi(onFinish: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF426902)), // fondo verde
+            .background(Color(0x9A8F9629)), // fondo verde
         contentAlignment = Alignment.Center
     ) {
         // Logo

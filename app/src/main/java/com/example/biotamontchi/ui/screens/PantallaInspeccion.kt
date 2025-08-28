@@ -63,8 +63,8 @@ fun PantallaInspeccion(
         ),
         R.drawable.fondoaerosol03 to listOf(
             PosRelativa(0.1f, 0.1f), PosRelativa(0.7f, 0.15f), PosRelativa(0.4f, 0.35f),
-            PosRelativa(0.8f, 0.45f), PosRelativa(0.1f, 0.55f), PosRelativa(0.9f, 0.65f),
-            PosRelativa(0.25f, 0.75f), PosRelativa(0.85f, 0.8f), PosRelativa(0.1f, 0.9f)
+            PosRelativa(0.8f, 0.45f), PosRelativa(0.1f, 0.55f), PosRelativa(0.8f, 0.65f),
+            PosRelativa(0.25f, 0.75f), PosRelativa(0.8f, 0.8f), PosRelativa(0.1f, 0.9f)
         )
     )
 

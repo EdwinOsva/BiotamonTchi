@@ -1408,7 +1408,7 @@ fun GameHeader(
             modifier = Modifier.padding(start = 8.dp)
         ) {
             Image(
-                painter = painterResource(id = R.drawable.maricaabajo),
+                painter = painterResource(id = R.drawable.marica),
                 contentDescription = "Icono vidas",
                 modifier = Modifier.size(24.dp) // reducimos de 32x32 a 24x24
             )
